@@ -223,7 +223,7 @@ uint8_t getInput(uint8_t index)
 	return hl;
 }
 
-void MainProcess_Task()  // This is a task.
+void MainProcess_Task()  
 {
     WriteDigitalOutput();
     ReadDigitalInput();

@@ -1,19 +1,33 @@
 #include "Arduino.h"
+#include "SPI.h"
 #include "MFRC522.h"
 #include "hmi.h"
 #include "rfid.h"
 #include "Timer.h"
 
-#define RFID_DEBUG 0
+#define RFID_DEBUG 1
 
 extern HardwareSerial *cmd_port;
 
-MFRC522 mfrc522(SS_PIN, RST_PIN);
+MFRC522 mfrc522(SS_PIN, RST_PIN);//必須要設定
 RFIDData rfiddata;
+
+/*
+板子<====>RFID模組接線方法
+SDA------->SDA
+SCK------->SCK
+MOSI------>MOSI
+MISO------>MISO
+IRQ------->不用接
+GND------->GND
+RST------->RST
+3.3V------>3.3V
+*/
 
 void RFID_Init(void)
 {
-  mfrc522.PCD_Init();
+  SPI.begin();  //必須要設定
+  mfrc522.PCD_Init();//必須要設定
   rfiddata.Len = 0;
   rfiddata.Update =false;
   rfiddata.retrytimecnt = 0xFF00;
@@ -21,6 +35,7 @@ void RFID_Init(void)
   rfiddata.ProcessIndex = 0xFF;
   rfiddata.ProcessTimeCnt = 0;
   rfiddata.readfinishupdate = false;
+  cmd_port->println("RFID_Init!");
 }
 void RFID_Reset(void)
 {
@@ -34,6 +49,12 @@ void RFID_Read()
 
 void RFID_Process(void)
 {
+    if(rfiddata.preProcessIndex != rfiddata.ProcessIndex){
+        rfiddata.preProcessIndex = rfiddata.ProcessIndex;
+#if RFID_DEBUG    
+        cmd_port->println("ProcessIndex: " + String(rfiddata.ProcessIndex));
+#endif
+    }
 	switch(rfiddata.ProcessIndex)
 	{
 		case 0:
@@ -43,12 +64,10 @@ void RFID_Process(void)
 #endif     
 			mfrc522.PCD_SoftPowerUp();
 			rfiddata.ProcessIndex ++;
-
 			break;
 		}
 		case 1:
 		{
-		    //偵測到卡片
 			if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) 
 			{
 				digitalWrite(BUZZ, HIGH);
@@ -104,11 +123,11 @@ void RFID_Process(void)
 			cmd_port->println("End of RFID_Process().");
 #endif     
 			rfiddata.ProcessIndex = 0xFF;
-			if(rfiddata.readfinishupdate)
-			{
-				rfiddata.readfinishupdate = false;
-				rfiddata.Update = true;  
-			}
+//			if(rfiddata.readfinishupdate)
+//			{
+//				rfiddata.readfinishupdate = false;
+//				rfiddata.Update = true;
+//			}
 			break;
 		}
 	}

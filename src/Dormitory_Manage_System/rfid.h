@@ -14,6 +14,7 @@ typedef struct
 	uint8_t 	retrycnt;
 
 	uint8_t	ProcessIndex;
+    uint8_t	preProcessIndex = 0xFF;
 	uint16_t ProcessTimeCnt;
 }RFIDData;
 

@@ -1,7 +1,7 @@
 #ifndef _HMI_H_
 #define _HMI_H_
 
-#define VERSTR "2021103101"
+#define VERSTR "2021103102"
 #define VENDOR "LH"
 
 #include "SoftwareSerial.h"

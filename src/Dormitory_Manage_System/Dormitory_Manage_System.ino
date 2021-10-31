@@ -22,9 +22,11 @@ void setup() {
     
 	READ_EEPROM();
 	TimerInit(1, 10000);
-	RFID_Init();
 	MainProcess_Init();
 	buzzerPlay(500);
+	RFID_Init();
+    cmd_port->println("Version:" + String(VERSTR));
+    cmd_port->println("End of setup.");
 }
 
 void loop() {
