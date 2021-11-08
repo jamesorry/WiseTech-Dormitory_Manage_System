@@ -21,19 +21,19 @@ void setup() {
 	hmicmd = new HMI_Command(&HMI_CMD_PORT, HMI_CMD_PORT_BR);
     
 	READ_EEPROM();
-	TimerInit(1, 10000);
 	MainProcess_Init();
-	buzzerPlay(500);
+    TimerInit(1, 10000);
 	RFID_Init();
     cmd_port->println("Version:" + String(VERSTR));
     cmd_port->println("End of setup.");
+//    buzzerPlay(100);
 }
 
 void loop() {
-	RFID_Process();
-	MainProcess_Task();
-	UserCommand_Task();
     hmicmd->Process();
+	RFID_Process();
+//	MainProcess_Task();
+	UserCommand_Task();
 	if(runtimedata.UpdateEEPROM)
 	{
 		runtimedata.UpdateEEPROM = false;

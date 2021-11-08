@@ -3,7 +3,7 @@
 
 #include "Arduino.h"
 
-#define EXTIO_NUM   2
+#define EXTIO_NUM   2//8個為一組
 #define INPUT_8_NUMBER  1
 #define OUTPUT_8_NUMBER 1
 

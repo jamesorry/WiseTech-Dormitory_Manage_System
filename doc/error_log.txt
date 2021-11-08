@@ -1,0 +1,107 @@
+hmicmd_port->available()
+ProcessTimeCnt: 8781
+ProcessIndex: 1
+delay 50 ms
+ProcessIndex: 2
+HMI CMD recive (4): fc,4,0,0,
+SplitRecvice Datlen: 4, Starti: 0
+Len: 4, Endi: 4
+reclen: 4
+SplitRecvice: 
+fc 4 0 0 
+DataBuffLen-(reclen+starti): 0
+SplitRecvice result: 1
+HIM Data Buff (0): 
+CheckReciveData reclen: 4
+CheckReciveData reclen: 4
+cmdRec.datatype: 0, cmd: 0
+HMI_CMD: 0
+Response_Ping()
+HMI_CMD_PING.
+cmdRec.datalen: 4
+HMI_Command::SendCommandQ: fd,4,0,ff,
+ProcessIndex: 0
+hmicmd_port->available()
+ProcessTimeCnt: 10175
+ProcessIndex: 1
+delay 50 ms
+ProcessIndex: 2
+HMI CMD recive (7): fc,7,1,1,1,1,f9,
+SplitRecvice Datlen: 7, Starti: 0
+Len: 7, Endi: 7
+reclen: 7
+SplitRecvice: 
+fc 7 1 1 1 1 f9 
+DataBuffLen-(reclen+starti): 0
+SplitRecvice result: 1
+HIM Data Buff (0): 
+CheckReciveData reclen: 7
+CheckReciveData reclen: 7
+cmdRec.datatype: 0, cmd: 1
+HMI_CMD: 1
+datalen: 3
+Set DO: 
+Set Output(0): 1 
+Set Output(1): 1 
+HMI_Command().
+init Q cnt: 0
+Read EEPROM.
+Vendor: LH
+10 bytes read.
+RFID_Init!
+Version:2021110501
+End of setup.
+ProcessIndex: 0
+hmicmd_port->available()
+ProcessTimeCnt: 1199
+ProcessIndex: 1
+delay 50 ms
+ProcessIndex: 2
+HMI CMD recive (5): fc,5,2,0,fd,
+SplitRecvice Datlen: 5, Starti: 0
+Len: 5, Endi: 5
+reclen: 5
+SplitRecvice: 
+fc 5 2 0 fd 
+DataBuffLen-(reclen+starti): 0
+SplitRecvice result: 1
+HIM Data Buff (0): 
+CheckReciveData reclen: 5
+CheckReciveData reclen: 5
+cmdRec.datatype: 0, cmd: 2
+HMI_CMD: 2
+Input: 0 0 0 0 0 0 0 0 : ⸮
+init Q cnt: 0
+Read EEPROM.
+Vendor: LH
+10 bytes read.
+RFID_Init!
+Version:2021110501
+End of setup.
+ProcessIndex: 0
+hmicmd_port->available()
+ProcessTimeCnt: 1335
+ProcessIndex: 1
+delay 50 ms
+ProcessIndex: 2
+HMI CMD recive (5): fc,5,2,1,fc,
+SplitRecvice Datlen: 5, Starti: 0
+Len: 5, Endi: 5
+reclen: 5
+SplitRecvice: 
+fc 5 2 1 fc 
+DataBuffLen-(reclen+starti): 0
+SplitRecvice result: 1
+HIM Data Buff (0): 
+CheckReciveData reclen: 5
+CheckReciveData reclen: 5
+cmdRec.datatype: 0, cmd: 2
+HMI_CMD: 2
+Output: 0 0 0 0 0 0 0 0 : 0
+0 0 0 0 0 0 6 9 : 80
+0 91 10 76 72 0 110 72 : fe
+Response_IO_Status()
+HMI_CMD_IO_STATUS.
+cmdRec.datalen: 8
+HMI_Command::SendCommandQ: fd,8,2,1,0,80,fe,7a,
+ProcessIndex: 0

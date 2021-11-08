@@ -5,6 +5,7 @@
 #include "MainProcess.h"
 #include <Adafruit_MCP23017.h>
 #include "rfid.h"
+#include "hmi.h"
 extern "C" {
 	#include <string.h>
 	#include <stdlib.h>
@@ -91,7 +92,6 @@ void HMI_Command::SendCommandQ(void)
 					else
 						cmdRec.datalen = 0;
 				}
-				
 				SendCmdTimeCnt = millis();
 			}
 		}
@@ -105,6 +105,7 @@ bool HMI_Command::SplitRecvice(void)
 	bool result = false;
 	if(DataBuffLen >= 129)	
 		DataBuffLen = 0;
+
 	if(DataBuffLen >= HMI_CMD_LEN_BASE)
 	{
 		//for(i=0; i<DataBuffLen-2; i++)
@@ -275,31 +276,40 @@ bool HMI_Command::Response_Ping()
 
 bool HMI_Command::Response_Set_DO_State()
 {
-	uint8_t i, bytei, result = true;
+	uint8_t i, bytei, result = true,num;
+	uint8_t datalen = recdata[HMI_CMD_BYTE_LENGTH] - HMI_CMD_LEN_BASE;
+    
 	HMICmdRec rec;
 	rec.datatype = QUEUE_DATA_TYPE_RESPONSE;
-	
-	uint8_t datalen = recdata[HMI_CMD_BYTE_LENGTH] - HMI_CMD_LEN_BASE;
-#if HMI_CMD_DEBUG
-	cmd_port->println("Set DO: ");
-#endif
-	for(bytei=0; bytei<datalen; bytei++)
-	{
-#if HMI_CMD_DEBUG
-		cmd_port->println("Set Output(" +String(i) + "): " + String(recdata[HMI_CMD_BYTE_DATA + bytei],HEX) + " ");
-#endif
-		for(i=0; i<8; i++)
-		{
-			setOutput(bytei*8+i, bitRead(recdata[HMI_CMD_BYTE_DATA + bytei], i));
-		}
-	}
 	rec.data[HMI_CMD_BYTE_TAGID] = ResponseTagID;
-	rec.data[HMI_CMD_BYTE_LENGTH] = HMI_CMD_LEN_BASE;
+	rec.data[HMI_CMD_BYTE_LENGTH] = HMI_CMD_LEN_BASE + 1;
 	rec.data[HMI_CMD_BYTE_CMDID] = HMI_CMD_SET_DO_STATE;
     rec.data[HMI_CMD_BYTE_DATA] = result;
 	rec.data[rec.data[HMI_CMD_BYTE_LENGTH]-1] = HMI_CMD_ComputeCRC(rec.data);
 	rec.datalen = rec.data[HMI_CMD_BYTE_LENGTH];
 	cmdQueue->push(&rec);
+    
+#if HMI_CMD_DEBUG
+    cmd_port->println("datalen: " + String(datalen));//3
+	cmd_port->println("Set DO: ");
+#endif
+
+#if 1//無法使用setOutput()會使板子當機，尚未找到原因
+	for(bytei=0; bytei<datalen; bytei++)//0~2
+	{
+#if HMI_CMD_DEBUG
+		cmd_port->println("Set Output(" +String(bytei) + "): " + String(recdata[HMI_CMD_BYTE_DATA + bytei],HEX) + " ");
+#endif
+		for(i=0; i<8; i++)
+		{
+//		    num = bytei*8+i;
+//            cmd_port->print(num);
+//            cmd_port->print("-->");
+//            cmd_port->println(getbit(recdata[HMI_CMD_BYTE_DATA + bytei], i));
+			setOutput(bytei*8+i, getbit(recdata[HMI_CMD_BYTE_DATA + bytei], i));
+        }
+	}
+#endif
 #if HMI_CMD_DEBUG
         cmd_port->println("Response_Set_DO_State()");
 #endif
@@ -313,23 +323,23 @@ bool HMI_Command::Response_IO_Status()
 	uint8_t bytei = 0;
 	HMICmdRec rec;
 	rec.datatype = QUEUE_DATA_TYPE_RESPONSE;
-	
 	rec.data[HMI_CMD_BYTE_TAGID] = ResponseTagID;
 	rec.data[HMI_CMD_BYTE_CMDID] = HMI_CMD_IO_STATUS;
-	if(recdata[HMI_CMD_BYTE_DATA] == 0)	//DI
+    rec.data[HMI_CMD_BYTE_LENGTH] = HMI_CMD_LEN_BASE + 1 + INPUT_8_NUMBER+EXTIO_NUM;
+
+    if(recdata[HMI_CMD_BYTE_DATA] == 0)	//DI
 	{
-		rec.data[HMI_CMD_BYTE_LENGTH] = HMI_CMD_LEN_BASE + 1 + INPUT_8_NUMBER+EXTIO_NUM;
 		rec.data[HMI_CMD_BYTE_DATA] = 0;	//0:Input
 #if HMI_CMD_DEBUG
-			cmd_port->println("Response_IO_Status()");
-			cmd_port->print("Input: ");
+        cmd_port->print("Input: ");
 #endif
 		for(bytei=0; bytei<(INPUT_8_NUMBER + EXTIO_NUM); bytei++)
 		{
 			rec.data[HMI_CMD_BYTE_DATA+1+bytei] = 0;
-			for(i=7; i>=0; i--)
+//          for(i=7; i>=0; i--)
+            for(i=0; i<8; i++)
 			{
-				hl = (getInput(bytei*8+i) & 0x01);
+				hl = (getInput(bytei*8+i) & 0x01);//無法使用getInput()會使板子當機，尚未找到原因
 				rec.data[HMI_CMD_BYTE_DATA+1+bytei] |=  (hl << i);
 				#if HMI_CMD_DEBUG
 					cmd_port->print(String(hl) + " ");
@@ -340,9 +350,8 @@ bool HMI_Command::Response_IO_Status()
 #endif
 		}
 	}
-	else
+	else if(recdata[HMI_CMD_BYTE_DATA] == 1)	//DO
 	{
-		rec.data[HMI_CMD_BYTE_LENGTH] = HMI_CMD_LEN_BASE + 1 + OUTPUT_8_NUMBER+EXTIO_NUM;
 		rec.data[HMI_CMD_BYTE_DATA] = 1;	//1:Output
 #if HMI_CMD_DEBUG
 		cmd_port->print("Output: ");
@@ -350,7 +359,8 @@ bool HMI_Command::Response_IO_Status()
 		for(bytei=0; bytei<(OUTPUT_8_NUMBER + EXTIO_NUM); bytei++)
 		{
 			rec.data[HMI_CMD_BYTE_DATA+1+bytei] = 0;
-			for(i=7; i>=0; i--)
+//			for(i=7; i>=0; i--)
+            for(i=0; i<8; i++)
 			{
 				rec.data[HMI_CMD_BYTE_DATA+1+bytei] |= digitalio.Output[bytei*8+i] << i;
 				cmd_port->print(String(digitalio.Output[bytei*8+i]) + " ");
@@ -376,6 +386,12 @@ bool HMI_Command::Response_Get_RFID()
 	uint8_t i;
     uint8_t timeout_second = recdata[HMI_CMD_BYTE_DATA];
     cmd_port->println("timeout_second: " + String(timeout_second));
+    rfiddata.Len = 4;
+	for(uint8_t i=0; i<rfiddata.Len; i++)
+		rfiddata.Data[i] = 0x00;	
+	rfiddata.retrytimecnt = 0;
+	RFID_Read();
+    
 	HMICmdRec rec;
 	rec.datatype = QUEUE_DATA_TYPE_RESPONSE;
 	rec.data[HMI_CMD_BYTE_TAGID] = ResponseTagID;

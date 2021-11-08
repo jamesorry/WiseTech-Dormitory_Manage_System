@@ -43,9 +43,9 @@ void MainProcess_Init()
     pinMode(OutputPin[i], OUTPUT);  
   }
   
-  for(j=0; j<EXTIO_NUM; j++)
+  for(j=0; j<EXTIO_NUM; j++)//0 1
   {
-    extio[j].begin(j);      // Default device address 0x20+j
+    extio[j].begin(j);      // Default device address 0x20+j //0x20，0x21
 
     for(i=0; i<8; i++)
     {
@@ -131,7 +131,6 @@ void WriteDigitalOutput()
     if(digitalio.PreOutput[i] != digitalio.Output[i])
     {
       digitalio.PreOutput[i] = digitalio.Output[i];
-      
       switch(i)
       {
         case 0: //onboard
@@ -169,7 +168,6 @@ void WriteDigitalOutput()
             extio[1].digitalWrite(bi, value);
           }
           break;
-
       } 
     }
   }
@@ -190,13 +188,13 @@ void OutputBuf2Byte()
 }
 void setOutput(uint8_t index, uint8_t hl)
 {
-	if(index < (OUTPUT_8_NUMBER*8))
+	if(index < (8))
 	{
 		digitalWrite(OutputPin[index], hl);
 	}
 	else
 	{
-		uint8_t extindex = index-(OUTPUT_8_NUMBER*8);
+		uint8_t extindex = index-(8);
 		uint8_t exi = extindex >> 3;
 		uint8_t bi = extindex & 0x07;
 		extio[exi].digitalWrite(bi, hl);
@@ -225,8 +223,8 @@ uint8_t getInput(uint8_t index)
 
 void MainProcess_Task()  
 {
-    WriteDigitalOutput();
-    ReadDigitalInput();
+//    WriteDigitalOutput();
+//    ReadDigitalInput();
 }
 void buzzerPlay(int playMS)
 {

@@ -1,6 +1,6 @@
 #include "Arduino.h"
-#include "SPI.h"
-#include "MFRC522.h"
+#include "SPI.h"//必須要設定
+#include "MFRC522.h"//必須要設定
 #include "hmi.h"
 #include "rfid.h"
 #include "Timer.h"
