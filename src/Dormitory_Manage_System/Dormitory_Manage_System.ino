@@ -2,7 +2,7 @@
 #include "rfid.h"
 #include "Adafruit_MCP23017.h"
 #include "MainProcess.h"
-#include "HMI.h"
+#include "hmi.h"
 #include <SPI.h>
 #include "Timer.h"
 #include "UserCommand.h"
@@ -32,7 +32,7 @@ void setup() {
 void loop() {
     hmicmd->Process();
 	RFID_Process();
-//	MainProcess_Task();
+	MainProcess_Task();
 	UserCommand_Task();
 	if(runtimedata.UpdateEEPROM)
 	{
@@ -46,4 +46,3 @@ ISR(TIMER1_COMPA_vect)//10ms
 	MainProcess_Timer();
     RFID_Timer();
 }
-

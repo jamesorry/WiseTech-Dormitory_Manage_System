@@ -8,10 +8,8 @@ typedef struct
 	uint8_t 	Data[16];
 	int 		Len;
 	bool 		Update;
-	bool 		readfinishupdate;
 
 	uint16_t	retrytimecnt;
-	uint8_t 	retrycnt;
 
 	uint8_t	ProcessIndex;
     uint8_t	preProcessIndex = 0xFF;

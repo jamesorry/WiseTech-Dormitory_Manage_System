@@ -223,8 +223,8 @@ uint8_t getInput(uint8_t index)
 
 void MainProcess_Task()  
 {
-//    WriteDigitalOutput();
-//    ReadDigitalInput();
+   WriteDigitalOutput();
+   ReadDigitalInput();
 }
 void buzzerPlay(int playMS)
 {

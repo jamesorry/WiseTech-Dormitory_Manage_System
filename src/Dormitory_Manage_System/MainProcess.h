@@ -15,9 +15,9 @@
 
 typedef struct _DigitalIO_
 {
-  uint8_t Input[4];
-  uint8_t Output[4];
-  uint8_t PreOutput[4];
+  uint8_t Input[(INPUT_8_NUMBER + EXTIO_NUM)*8];
+  uint8_t Output[(OUTPUT_8_NUMBER + EXTIO_NUM)*8];
+  uint8_t PreOutput[(OUTPUT_8_NUMBER + EXTIO_NUM)*8];
 }DigitalIO;
 
 typedef struct _MainDataStruct_

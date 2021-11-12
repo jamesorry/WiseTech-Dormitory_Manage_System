@@ -4,11 +4,15 @@
 #include "hmi.h"
 #include "rfid.h"
 #include "Timer.h"
+#include "MainProcess.h"
+#include "HMI_Command.h"
 
 #define RFID_DEBUG 1
 
 extern HardwareSerial *cmd_port;
-
+extern MainDataStruct maindata;
+extern RuntimeStatus runtimedata;
+extern HMI_Command *hmicmd;
 MFRC522 mfrc522(SS_PIN, RST_PIN);//必須要設定
 RFIDData rfiddata;
 
@@ -31,10 +35,8 @@ void RFID_Init(void)
   rfiddata.Len = 0;
   rfiddata.Update =false;
   rfiddata.retrytimecnt = 0xFF00;
-
   rfiddata.ProcessIndex = 0xFF;
   rfiddata.ProcessTimeCnt = 0;
-  rfiddata.readfinishupdate = false;
   cmd_port->println("RFID_Init!");
 }
 void RFID_Reset(void)
@@ -45,6 +47,10 @@ void RFID_Reset(void)
 void RFID_Read()
 {
 	rfiddata.ProcessIndex = 0;
+	rfiddata.Update = false;
+	rfiddata.Len = 4;
+	for(uint8_t i=0; i<rfiddata.Len; i++)
+		rfiddata.Data[i] = 0x00;
 }
 
 void RFID_Process(void)
@@ -64,18 +70,28 @@ void RFID_Process(void)
 #endif     
 			mfrc522.PCD_SoftPowerUp();
 			rfiddata.ProcessIndex ++;
+			rfiddata.retrytimecnt = 0;
 			break;
 		}
 		case 1:
 		{
-			if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) 
+			if(rfiddata.retrytimecnt > runtimedata.TimeoutSecond)
 			{
-				digitalWrite(BUZZ, HIGH);
-				rfiddata.ProcessTimeCnt = 0;
-				rfiddata.ProcessIndex ++;
+#if RFID_DEBUG    
+				cmd_port->println("Read RFID Fail.");
+#endif     
+				rfiddata.ProcessIndex = 0x0E;
 			}
 			else
-				rfiddata.ProcessIndex = 0x0E;
+			{
+				if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) 
+				{
+					//已讀取到RFID
+					digitalWrite(BUZZ, HIGH);
+					rfiddata.ProcessTimeCnt = 0;
+					rfiddata.ProcessIndex ++;
+				}
+			}
 			break;
 		}
 		case 2:
@@ -97,16 +113,13 @@ void RFID_Process(void)
 #if RFID_DEBUG    
 				cmd_port->print("PICC type: ");	   // 顯示卡片類型
 		    	cmd_port->println(mfrc522.PICC_GetTypeName(piccType));
-#endif     
-
+#endif
 		    for (byte i = 0; i < idSize; i++)
 		      rfiddata.Data[i] = id[i];
 			rfiddata.Len = idSize;
 		    rfiddata.Update = true;
-		      
 #if RFID_DEBUG
 		    cmd_port->print("RFID: ");       // 顯示卡片的UID長度值
-		  
 		    for (byte i = 0; i < idSize; i++) {  // 逐一顯示UID碼
 		      cmd_port->print(id[i], HEX);       // 以16進位顯示UID值
 		    }
@@ -119,23 +132,15 @@ void RFID_Process(void)
 		case 0x0E:
 		{
 			mfrc522.PCD_SoftPowerDown();
+			rfiddata.ProcessIndex = 0xFF;
+			hmicmd->Response_Get_RFID();
 #if RFID_DEBUG    
 			cmd_port->println("End of RFID_Process().");
 #endif     
-			rfiddata.ProcessIndex = 0xFF;
-//			if(rfiddata.readfinishupdate)
-//			{
-//				rfiddata.readfinishupdate = false;
-//				rfiddata.Update = true;
-//			}
 			break;
 		}
 	}
-	
-    
-  
 }
-
 
 void RFID_Timer()
 {

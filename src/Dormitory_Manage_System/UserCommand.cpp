@@ -2,7 +2,7 @@
 #include "SoftwareSerial.h"
 #include "UserCommand.h"
 #include "MainProcess.h"
-#include "HMI.h"
+#include "hmi.h"
 #include "EEPROM_Function.h"
 #include "rfid.h"
 
@@ -15,14 +15,14 @@ CMD g_cmdFunc[] = {
     {"SD", cmd_UpdateEEPROM},
     {"CD", cmd_ClearEEPROM},
     {"SD", cmd_Maindata},
-	{"adc", getAdc},
-	{"getgpio", getGpio},
-	{"setgpio", setGpio},
-	{"reset", resetArduino},
-	{"getmicros", getMicros},
-	{"ver", cmd_CodeVer},
-	{"echoon", echoOn},
-	{"echooff", echoOff},
+    {"adc", getAdc},
+    {"getgpio", getGpio},
+    {"setgpio", setGpio},
+    {"reset", resetArduino},
+    {"getmicros", getMicros},
+    {"ver", cmd_CodeVer},
+    {"echoon", echoOn},
+    {"echooff", echoOff},
     {"out", cmdOutput},
     {"in", cmdInput},
     {"ReadRFID", cmd_Trigger_Read_RFID},
@@ -58,10 +58,22 @@ bool getNextArg(String &arg)
 
 void cmd_Trigger_Read_RFID(void)
 {
+  String arg1;
+	long timeout;
+
+	getNextArg(arg1);
+	if( (arg1.length()==0))
+	{
+		cmd_port->println("Please input enough parameters");
+		return;
+	}
+	timeout = arg1.toInt();
+  cmd_port->println("timeout: " + String(timeout));
+
 	rfiddata.Len = 4;
 	for(uint8_t i=0; i<rfiddata.Len; i++)
 		rfiddata.Data[i] = 0x00;	
-	rfiddata.retrytimecnt = 0;
+	rfiddata.retrytimecnt = timeout;
 	RFID_Read();
 }
 
@@ -366,4 +378,3 @@ void UserCommand_Task(void)
 
   }
 }
-

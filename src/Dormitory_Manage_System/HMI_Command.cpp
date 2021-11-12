@@ -1,6 +1,6 @@
 #include "Arduino.h"
 #include <SoftwareSerial.h>
-#include "hmi_command.h"
+#include "HMI_Command.h"
 #include "cppQueue.h"
 #include "MainProcess.h"
 #include <Adafruit_MCP23017.h>
@@ -294,7 +294,8 @@ bool HMI_Command::Response_Set_DO_State()
 	cmd_port->println("Set DO: ");
 #endif
 
-#if 1//無法使用setOutput()會使板子當機，尚未找到原因
+	//無法使用setOutput()會使板子當機，尚未找到原因
+	//-->已找到問題原因==>DigitalIO buffer size
 	for(bytei=0; bytei<datalen; bytei++)//0~2
 	{
 #if HMI_CMD_DEBUG
@@ -302,14 +303,9 @@ bool HMI_Command::Response_Set_DO_State()
 #endif
 		for(i=0; i<8; i++)
 		{
-//		    num = bytei*8+i;
-//            cmd_port->print(num);
-//            cmd_port->print("-->");
-//            cmd_port->println(getbit(recdata[HMI_CMD_BYTE_DATA + bytei], i));
 			setOutput(bytei*8+i, getbit(recdata[HMI_CMD_BYTE_DATA + bytei], i));
         }
 	}
-#endif
 #if HMI_CMD_DEBUG
         cmd_port->println("Response_Set_DO_State()");
 #endif
@@ -339,7 +335,9 @@ bool HMI_Command::Response_IO_Status()
 //          for(i=7; i>=0; i--)
             for(i=0; i<8; i++)
 			{
-				hl = (getInput(bytei*8+i) & 0x01);//無法使用getInput()會使板子當機，尚未找到原因
+				hl = (getInput(bytei*8+i) & 0x01);
+				//無法使用getInput()會使板子當機，尚未找到原因
+				//-->已找到問題原因==>DigitalIO buffer size
 				rec.data[HMI_CMD_BYTE_DATA+1+bytei] |=  (hl << i);
 				#if HMI_CMD_DEBUG
 					cmd_port->print(String(hl) + " ");
@@ -383,30 +381,38 @@ bool HMI_Command::Response_IO_Status()
 
 bool HMI_Command::Response_Get_RFID()
 {
-	uint8_t i;
+	uint8_t i, result;
+#if 0
+	//獲取到timeout
     uint8_t timeout_second = recdata[HMI_CMD_BYTE_DATA];
     cmd_port->println("timeout_second: " + String(timeout_second));
     rfiddata.Len = 4;
-	for(uint8_t i=0; i<rfiddata.Len; i++)
+	for(i=0; i<rfiddata.Len; i++)
 		rfiddata.Data[i] = 0x00;	
 	rfiddata.retrytimecnt = 0;
 	RFID_Read();
-    
+#endif
+	if(rfiddata.Update == true)
+		result = 0x00; //pass
+	else
+		result = 0x01; //fail
 	HMICmdRec rec;
 	rec.datatype = QUEUE_DATA_TYPE_RESPONSE;
 	rec.data[HMI_CMD_BYTE_TAGID] = ResponseTagID;
-	rec.data[HMI_CMD_BYTE_LENGTH] = HMI_CMD_LEN_BASE + rfiddata.Len;
+	rec.data[HMI_CMD_BYTE_LENGTH] = HMI_CMD_LEN_BASE + 1 + rfiddata.Len;
 	rec.data[HMI_CMD_BYTE_CMDID] = HMI_CMD_GET_RFID;
-//		for(uint8_t i=0; i<rfiddata.Len; i++)
-//			rec.data[i] = rfiddata.Data[i];
+	rec.data[HMI_CMD_BYTE_DATA] = result;
+	for(i=0; i<rfiddata.Len; i++)
+		rec.data[HMI_CMD_BYTE_DATA + 1 + i] = rfiddata.Data[i];
 	rec.data[rec.data[HMI_CMD_BYTE_LENGTH]-1] = HMI_CMD_ComputeCRC(rec.data);
 	rec.datalen = rec.data[HMI_CMD_BYTE_LENGTH];
 	rec.retrycnt = 0;
 	cmdQueue->push(&rec);
 
 #if HMI_CMD_DEBUG
-	cmd_port->println("Response_Ping()");
+	cmd_port->println("Response_Get_RFID()");
 #endif
+	runtimedata.TimeoutSecond = 1;
 	return true;
 }
 
@@ -487,8 +493,11 @@ uint8_t HMI_Command::CheckReciveData()
                     cmd_port->println("HMI_CMD_IO_STATUS.");
                     break;
                 case HMI_CMD_GET_RFID:
-                    issupportcmd = Response_Get_RFID();
+                    // issupportcmd = Response_Get_RFID();
                     cmd_port->println("HMI_CMD_GET_RFID.");
+					runtimedata.TimeoutSecond = recdata[HMI_CMD_BYTE_DATA];
+					cmd_port->println("timeout_second: " + String(runtimedata.TimeoutSecond));
+					RFID_Read();
                     break;
 			}
 			if(issupportcmd)
@@ -507,4 +516,3 @@ uint8_t HMI_Command::CheckReciveData()
 	}
 	
 }
-

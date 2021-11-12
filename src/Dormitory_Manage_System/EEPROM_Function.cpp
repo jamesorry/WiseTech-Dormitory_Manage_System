@@ -1,6 +1,6 @@
 #include "EEPROM_Function.h"
 #include "MainProcess.h"
-#include "HMI.h"
+#include "hmi.h"
 
 #define EEPROM_DEBUG	1
 
@@ -70,6 +70,3 @@ template <class T> int EEPROM_readAnything(int address, T &data)
     *p++ = EEPROM.read(address++);
   return i;
 }
-
-
-
