@@ -59,7 +59,7 @@ bool getNextArg(String &arg)
 void cmd_Trigger_Read_RFID(void)
 {
   String arg1;
-	long timeout;
+	int timeout;
 
 	getNextArg(arg1);
 	if( (arg1.length()==0))
@@ -73,7 +73,7 @@ void cmd_Trigger_Read_RFID(void)
 	rfiddata.Len = 4;
 	for(uint8_t i=0; i<rfiddata.Len; i++)
 		rfiddata.Data[i] = 0x00;	
-	rfiddata.retrytimecnt = timeout;
+	runtimedata.TimeoutSecond = timeout;
 	RFID_Read();
 }
 

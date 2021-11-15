@@ -26,7 +26,7 @@ void setup() {
 	RFID_Init();
     cmd_port->println("Version:" + String(VERSTR));
     cmd_port->println("End of setup.");
-//    buzzerPlay(100);
+    buzzerPlay(300);
 }
 
 void loop() {

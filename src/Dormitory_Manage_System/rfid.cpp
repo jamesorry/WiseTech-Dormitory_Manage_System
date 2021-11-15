@@ -75,7 +75,7 @@ void RFID_Process(void)
 		}
 		case 1:
 		{
-			if(rfiddata.retrytimecnt > runtimedata.TimeoutSecond)
+			if(rfiddata.retrytimecnt > runtimedata.TimeoutSecond*1000)
 			{
 #if RFID_DEBUG    
 				cmd_port->println("Read RFID Fail.");
