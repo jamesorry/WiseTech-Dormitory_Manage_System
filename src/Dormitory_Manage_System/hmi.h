@@ -1,7 +1,7 @@
 #ifndef _HMI_H_
 #define _HMI_H_
 
-#define VERSTR "2021111501"
+#define VERSTR "2021111901"
 #define VENDOR "LH"
 
 #include "SoftwareSerial.h"
@@ -45,8 +45,8 @@ static const uint8_t InputPin[] = {22, 23, 24, 25, 26, 27, 28, 29,
 static const uint8_t ADC_PWMPin[] = {0, 0, 0, A8, 2, A9, 3, A10, 6, A11, 7, A12,
 									11, A13, 12, A14, 44, A15, 45, 0, 0};
 
-#define CMD_PORT        Serial
-#define CMD_PORT_BR     115200
-#define	HMI_CMD_PORT		Serial3
+#define CMD_PORT            Serial
+#define CMD_PORT_BR         115200
+#define	HMI_CMD_PORT		Serial2
 #define	HMI_CMD_PORT_BR		115200
 #endif //_HMI_H_

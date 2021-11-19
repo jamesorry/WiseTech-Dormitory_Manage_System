@@ -42,6 +42,7 @@ void RFID_Init(void)
 void RFID_Reset(void)
 {
   mfrc522.PCD_Reset();
+  mfrc522.PCD_Init();
 }
 
 void RFID_Read()

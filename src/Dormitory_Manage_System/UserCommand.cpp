@@ -58,7 +58,7 @@ bool getNextArg(String &arg)
 
 void cmd_Trigger_Read_RFID(void)
 {
-  String arg1;
+    String arg1;
 	int timeout;
 
 	getNextArg(arg1);
@@ -68,13 +68,16 @@ void cmd_Trigger_Read_RFID(void)
 		return;
 	}
 	timeout = arg1.toInt();
-  cmd_port->println("timeout: " + String(timeout));
-
-	rfiddata.Len = 4;
-	for(uint8_t i=0; i<rfiddata.Len; i++)
-		rfiddata.Data[i] = 0x00;	
-	runtimedata.TimeoutSecond = timeout;
-	RFID_Read();
+    cmd_port->println("timeout: " + String(timeout));
+    if(timeout == 0)
+        RFID_Reset();
+    else{
+        rfiddata.Len = 4;
+        for(uint8_t i=0; i<rfiddata.Len; i++)
+            rfiddata.Data[i] = 0x00;    
+        runtimedata.TimeoutSecond = timeout;
+        RFID_Read();
+    }
 }
 
 void cmdInput(void)

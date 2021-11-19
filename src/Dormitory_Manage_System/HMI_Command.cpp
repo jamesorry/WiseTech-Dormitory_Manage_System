@@ -41,7 +41,6 @@ HMI_Command::HMI_Command(HardwareSerial* port, const uint32_t baudrate, const ui
 		cmd_port->println("init Q cnt: " + String(cmdQueue->getCount()));
 #endif
 	cmdRec.datalen = 0;
-
 	ProcessIndex = 0;
 	ProcessTimeCnt = 0;
 }
@@ -105,32 +104,21 @@ bool HMI_Command::SplitRecvice(void)
 	bool result = false;
 	if(DataBuffLen >= 129)	
 		DataBuffLen = 0;
-
+    
 	if(DataBuffLen >= HMI_CMD_LEN_BASE)
 	{
-		//for(i=0; i<DataBuffLen-2; i++)
+		cmd_port->println("DataBuffLen: " + String(DataBuffLen));
 		for(i=0; i<=DataBuffLen-HMI_CMD_LEN_BASE; i++)
 			if((DataBuff[i] == ControllerTagID) || (DataBuff[i] == ResponseTagID) || skipHMI_ID)
 			{
-				if(((DataBuff[i+1] < 32) && (DataBuff[i+1] >= HMI_CMD_LEN_BASE))
-					&& (DataBuff[i+2] < 0x20)	//CMD ID < 0x20
-					&& (DataBuff[i+3] < 0x50)	//HMI ID < 0x50
-					)
+                cmd_port->println("DataBuffLen i: " + String(i));
+				if(((DataBuff[i+1] < 32) && (DataBuff[i+1] >= HMI_CMD_LEN_BASE)))
 				{
 					bool match = true;
-//					if(((DataBuff[i+1] == 9) || (DataBuff[i+1] == 13))
-//						&&(DataBuff[i+2] == HMI_CMD_DATA_INDICATION))
-//					{
-//						if((DataBuff[i+4] == ControllerTagID) || (DataBuff[i+4] == ResponseTagID)
-//							|| (DataBuff[i+5] == ControllerTagID) || (DataBuff[i+5] == ResponseTagID)
-//							|| (DataBuff[i+6] == ControllerTagID) || (DataBuff[i+6] == ResponseTagID)
-//							|| (DataBuff[i+7] == ControllerTagID) || (DataBuff[i+7] == ResponseTagID)
-//							)
-//							match = false;
-//					}
-
+                    cmd_port->println("check match.");
 					if(match)
 					{
+					    cmd_port->println("match.");
 						starti = i;
 						break;
 					}
@@ -273,11 +261,11 @@ bool HMI_Command::Response_Ping()
 #endif
 	return true;
 }
-
+//receive: FC 09 01 F1 F2 F3 F4 F5 CRC
 bool HMI_Command::Response_Set_DO_State()
 {
 	uint8_t i, bytei, result = true,num;
-	uint8_t datalen = recdata[HMI_CMD_BYTE_LENGTH] - HMI_CMD_LEN_BASE;
+	uint8_t datalen = recdata[HMI_CMD_BYTE_LENGTH] - HMI_CMD_LEN_BASE;//5
     
 	HMICmdRec rec;
 	rec.datatype = QUEUE_DATA_TYPE_RESPONSE;
@@ -290,18 +278,17 @@ bool HMI_Command::Response_Set_DO_State()
 	cmdQueue->push(&rec);
     
 #if HMI_CMD_DEBUG
-    cmd_port->println("datalen: " + String(datalen));//3
+    cmd_port->println("datalen: " + String(datalen));//5
 	cmd_port->println("Set DO: ");
 #endif
-
 	//無法使用setOutput()會使板子當機，尚未找到原因
 	//-->已找到問題原因==>DigitalIO buffer size
-	for(bytei=0; bytei<datalen; bytei++)//0~2
+	for(bytei=0; bytei<datalen; bytei++)//0~4
 	{
 #if HMI_CMD_DEBUG
 		cmd_port->println("Set Output(" +String(bytei) + "): " + String(recdata[HMI_CMD_BYTE_DATA + bytei],HEX) + " ");
 #endif
-		for(i=0; i<8; i++)
+		for(i=0; i<8; i++)//0~7
 		{
 			setOutput(bytei*8+i, getbit(recdata[HMI_CMD_BYTE_DATA + bytei], i));
         }
@@ -493,7 +480,6 @@ uint8_t HMI_Command::CheckReciveData()
                     cmd_port->println("HMI_CMD_IO_STATUS.");
                     break;
                 case HMI_CMD_GET_RFID:
-                    // issupportcmd = Response_Get_RFID();
                     cmd_port->println("HMI_CMD_GET_RFID.");
 					runtimedata.TimeoutSecond = recdata[HMI_CMD_BYTE_DATA];
 					cmd_port->println("timeout_second: " + String(runtimedata.TimeoutSecond));

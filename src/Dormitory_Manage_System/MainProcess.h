@@ -2,8 +2,8 @@
 #define _MAIN_PROCESS_H_
 
 #include "Arduino.h"
-
-#define EXTIO_NUM   2//8個為一組
+//40IN/40OUT (8+16*2)
+#define EXTIO_NUM   4//8個為一組
 #define INPUT_8_NUMBER  1
 #define OUTPUT_8_NUMBER 1
 
