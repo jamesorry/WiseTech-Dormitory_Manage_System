@@ -265,7 +265,7 @@ bool HMI_Command::Response_Ping()
 bool HMI_Command::Response_Set_DO_State()
 {
     int i;
-	uint8_t bytei, result = true,num;
+	uint8_t bytei, result=0x00, num;
 	uint8_t datalen = recdata[HMI_CMD_BYTE_LENGTH] - HMI_CMD_LEN_BASE;//5
     
 	HMICmdRec rec;
@@ -273,7 +273,7 @@ bool HMI_Command::Response_Set_DO_State()
 	rec.data[HMI_CMD_BYTE_TAGID] = ResponseTagID;
 	rec.data[HMI_CMD_BYTE_LENGTH] = HMI_CMD_LEN_BASE + 1;
 	rec.data[HMI_CMD_BYTE_CMDID] = HMI_CMD_SET_DO_STATE;
-    rec.data[HMI_CMD_BYTE_DATA] = result;
+    rec.data[HMI_CMD_BYTE_DATA] = result;//0 = success; 1 = fail
 	rec.data[rec.data[HMI_CMD_BYTE_LENGTH]-1] = HMI_CMD_ComputeCRC(rec.data);
 	rec.datalen = rec.data[HMI_CMD_BYTE_LENGTH];
 	cmdQueue->push(&rec);
