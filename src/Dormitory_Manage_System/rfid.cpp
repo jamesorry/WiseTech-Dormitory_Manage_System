@@ -69,7 +69,7 @@ void RFID_Process(void)
 #if RFID_DEBUG    
 			cmd_port->println("Start of RFID_Process().");
 #endif     
-			mfrc522.PCD_SoftPowerUp();
+//			mfrc522.PCD_SoftPowerUp();
 			rfiddata.ProcessIndex ++;
 			rfiddata.retrytimecnt = 0;
 			break;
@@ -132,7 +132,7 @@ void RFID_Process(void)
 		}
 		case 0x0E:
 		{
-			mfrc522.PCD_SoftPowerDown();
+//			mfrc522.PCD_SoftPowerDown();
 			rfiddata.ProcessIndex = 0xFF;
 			hmicmd->Response_Get_RFID();
 #if RFID_DEBUG    
