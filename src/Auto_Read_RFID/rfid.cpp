@@ -40,7 +40,7 @@ void doRfidProcess(void)
 #if needReadRfid
 	  for (byte i = 0; i < idSize; i++)
       {  // 逐一顯示UID碼
-        sprintf(str1, "%02X", id[i]);
+        sprintf(str1, "%02X ", id[i]);
         Str_Str = Str_Str + String(str1);// 以16進位顯示UID
 	  }Serial.println(Str_Str);
 #endif
