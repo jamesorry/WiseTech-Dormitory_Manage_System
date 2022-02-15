@@ -1,7 +1,13 @@
 #ifndef _HMI_H_
 #define _HMI_H_
+/*
+    2022/02/15
+    鴻績宿舍管理案 IO 狀態需要修改為Big-Endian
+    bit map 每8個bit 需要顛倒
+    若是以文件方式編寫，就不能以硬體邏輯去思考
+*/
 
-#define VERSTR "2021112401"
+#define VERSTR "2022021501"
 #define VENDOR "LH"
 
 #include "SoftwareSerial.h"

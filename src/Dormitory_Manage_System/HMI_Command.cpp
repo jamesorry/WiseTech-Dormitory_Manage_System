@@ -290,11 +290,13 @@ bool HMI_Command::Response_Set_DO_State()
 		cmd_port->print("Set Output(" +String(bytei) + "): " + String(recdata[HMI_CMD_BYTE_DATA + bytei],HEX) + " ");
         cmd_port->print("->");
 #endif
-		for(i=7; i>=0; i--)
+//		for(i=7; i>=0; i--)
+        for(i=0; i<8; i++)
 		{
 		    cmd_port->print(getbit(recdata[HMI_CMD_BYTE_DATA + bytei], i));
             cmd_port->print(",");
-			setOutput(bytei*8+(7-i), getbit(recdata[HMI_CMD_BYTE_DATA + bytei], i));
+//			setOutput(bytei*8+(7-i), getbit(recdata[HMI_CMD_BYTE_DATA + bytei], i));
+			setOutput(bytei*8 + i, getbit(recdata[HMI_CMD_BYTE_DATA + bytei], i));
         }
         cmd_port->println("");
 	}
@@ -304,6 +306,8 @@ bool HMI_Command::Response_Set_DO_State()
 	return true;
 }
 
+//無法使用getInput()會使板子當機，尚未找到原因
+//-->已找到問題原因==>DigitalIO buffer size
 bool HMI_Command::Response_IO_Status()
 {
 	int i;
@@ -324,13 +328,12 @@ bool HMI_Command::Response_IO_Status()
 		for(bytei=0; bytei<(INPUT_8_NUMBER + EXTIO_NUM); bytei++)
 		{
 			rec.data[HMI_CMD_BYTE_DATA+1+bytei] = 0;
-            for(i=0; i<8; i++)
-//            for(i=7; i>=0; i--)
+//            for(i=0; i<8; i++)
+            for(i=7; i>=0; i--)
 			{
 				hl = (getInput(bytei*8+i) & 0x01);
-				//無法使用getInput()會使板子當機，尚未找到原因
-				//-->已找到問題原因==>DigitalIO buffer size
-				rec.data[HMI_CMD_BYTE_DATA+1+bytei] |=  (hl << (7-i));
+//				rec.data[HMI_CMD_BYTE_DATA+1+bytei] |=  (hl << (7-i));
+				rec.data[HMI_CMD_BYTE_DATA+1+bytei] |=  (hl << i);
 				#if HMI_CMD_DEBUG
 					cmd_port->print(String(hl) + " ");
 				#endif
@@ -349,10 +352,11 @@ bool HMI_Command::Response_IO_Status()
 		for(bytei=0; bytei<(OUTPUT_8_NUMBER + EXTIO_NUM); bytei++)
 		{
 			rec.data[HMI_CMD_BYTE_DATA+1+bytei] = 0;
-//			for(i=7; i>=0; i--)
-			for(i=0; i<8; i++)
+//          for(i=0; i<8; i++)
+			for(i=7; i>=0; i--)
             {
-				rec.data[HMI_CMD_BYTE_DATA+1+bytei] |= digitalio.Output[bytei*8+i] << (7-i);
+//				rec.data[HMI_CMD_BYTE_DATA+1+bytei] |= digitalio.Output[bytei*8+i] << (7-i);
+                rec.data[HMI_CMD_BYTE_DATA+1+bytei] |= digitalio.Output[bytei*8+i] << i;
 				cmd_port->print(String(digitalio.Output[bytei*8+i]) + " ");
 			}
 #if HMI_CMD_DEBUG
