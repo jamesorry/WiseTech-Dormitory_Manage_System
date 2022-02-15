@@ -47,6 +47,6 @@ static const uint8_t ADC_PWMPin[] = {0, 0, 0, A8, 2, A9, 3, A10, 6, A11, 7, A12,
 
 #define CMD_PORT            Serial
 #define CMD_PORT_BR         115200
-#define	HMI_CMD_PORT		Serial3
+#define	HMI_CMD_PORT		Serial1
 #define	HMI_CMD_PORT_BR		115200
 #endif //_HMI_H_
